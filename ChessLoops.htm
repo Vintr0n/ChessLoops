@@ -26,12 +26,8 @@
             position: relative;
         }
 
-        .chess-board.flipped {
-            transform: rotate(180deg);
-        }
-        .chess-board.flipped .piece {
-            transform: rotate(180deg);
-        }
+        .chess-board.flipped { transform: rotate(180deg); }
+        .chess-board.flipped .piece { transform: rotate(180deg); }
 
         .square {
             display: flex;
@@ -43,7 +39,6 @@
 
         .square.light { background-color: #e2e8f0; }
         .square.dark { background-color: #94a3b8; }
-        
         .square.last-move { background-color: rgba(253, 224, 71, 0.6) !important; }
         .square.selected { background-color: rgba(59, 130, 246, 0.6) !important; }
         .square.valid-target::after {
@@ -82,15 +77,8 @@
             animation: pop-feedback 0.6s ease-out forwards;
         }
 
-        .icon-success {
-            background-color: #22c55e;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
-        }
-
-        .icon-error {
-            background-color: #ef4444;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-        }
+        .icon-success { background-color: #22c55e; box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+        .icon-error { background-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
 
         @keyframes pop-feedback {
             0% { transform: scale(0.5); opacity: 0; }
@@ -108,11 +96,7 @@
             margin-bottom: 5px;
         }
 
-        .cross {
-            position: relative;
-            width: 40px;
-            height: 40px;
-        }
+        .cross { position: relative; width: 40px; height: 40px; }
         .cross::before, .cross::after {
             content: '';
             position: absolute;
@@ -126,21 +110,188 @@
         .cross::before { transform: rotate(45deg); }
         .cross::after { transform: rotate(-45deg); }
 
-        .pgn-input {
+        .pgn-input { scrollbar-width: thin; scrollbar-color: #475569 #1e293b; }
+        .custom-shadow { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.3); }
+
+        /* Modal */
+        #openingsModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            padding: 1rem;
+        }
+        #openingsModal.open { display: flex; }
+
+        .modal-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 680px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            animation: modal-in 0.2s ease-out;
+        }
+
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            padding: 1.25rem 1.5rem;
             scrollbar-width: thin;
             scrollbar-color: #475569 #1e293b;
         }
 
-        .custom-shadow {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        /* Tab bar */
+        .tab-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            background: #0f172a;
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+            color: #94a3b8;
+            background: transparent;
+        }
+        .tab-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Opening cards */
+        .opening-category { margin-bottom: 1.25rem; }
+        .opening-category h3 {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .openings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .opening-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+        }
+        .opening-card:hover {
+            border-color: #3b82f6;
+            background: #1e3a5f;
+        }
+        .opening-card.selected {
+            border-color: #3b82f6;
+            background: #1e3a5f;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+        }
+        .opening-card .card-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 0.2rem;
+        }
+        .opening-card .card-lines {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .opening-card .card-tag {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.1rem 0.35rem;
+            border-radius: 9999px;
+            margin-top: 0.4rem;
+        }
+        .tag-e4 { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+        .tag-d4 { background: #0369a122; color: #38bdf8; border: 1px solid #0369a144; }
+        .tag-other { background: #05966922; color: #34d399; border: 1px solid #05966944; }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #334155;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
+    <!-- ========== POPULAR OPENINGS MODAL ========== -->
+    <div id="openingsModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h2 class="text-lg font-bold">Popular Openings</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Select an opening to load its lines into the trainer</p>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+
+            <!-- Tab bar inside modal body header -->
+            <div class="px-6 pt-4 flex-shrink-0">
+                <div class="tab-bar">
+                    <button class="tab-btn active" id="tabWhite" onclick="switchTab('white')">♔ As White</button>
+                    <button class="tab-btn" id="tabBlack" onclick="switchTab('black')">♚ As Black</button>
+                </div>
+            </div>
+
+            <div class="modal-body" id="modalBody"></div>
+
+            <div class="modal-footer">
+                <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors">Cancel</button>
+                <button onclick="loadSelectedOpening()" class="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors">Load Lines</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MAIN APP ========== -->
     <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Sidebar: Input and Line Selection -->
+        <!-- Sidebar -->
         <div class="lg:col-span-4 flex flex-col gap-6">
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow">
                 <h2 class="text-xl font-bold mb-4">Line Setup</h2>
@@ -150,12 +301,20 @@
                     class="w-full h-48 bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none pgn-input"
                     placeholder="Paste lines here..."
                 ></textarea>
-                <button 
-                    onclick="loadLines()"
-                    class="w-full mt-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition-all"
-                >
-                    Load Repertoire
-                </button>
+                <div class="flex gap-2 mt-4">
+                    <button 
+                        onclick="openModal()"
+                        class="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-semibold py-2 rounded-lg transition-all text-sm flex items-center justify-center gap-2"
+                    >
+                        <span>♟</span> Popular Openings
+                    </button>
+                    <button 
+                        onclick="loadLines()"
+                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition-all text-sm"
+                    >
+                        Load Repertoire
+                    </button>
+                </div>
             </div>
 
             <div id="lineListContainer" class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow hidden">
@@ -164,9 +323,8 @@
             </div>
         </div>
 
-        <!-- Main Content: Chess Board -->
+        <!-- Board -->
         <div class="lg:col-span-5 flex flex-col items-center">
-            <!-- Training Controls: Side Selection -->
             <div class="mb-6 flex bg-slate-800 p-1 rounded-lg border border-slate-700">
                 <button 
                     id="sideWhite" 
@@ -186,17 +344,11 @@
 
             <div class="relative w-full max-w-[500px]">
                 <div id="board" class="chess-board rounded shadow-2xl overflow-hidden"></div>
-                
                 <div id="feedbackSuccess" class="feedback-container">
-                    <div class="feedback-icon icon-success">
-                        <div class="checkmark"></div>
-                    </div>
+                    <div class="feedback-icon icon-success"><div class="checkmark"></div></div>
                 </div>
-
                 <div id="feedbackError" class="feedback-container">
-                    <div class="feedback-icon icon-error">
-                        <div class="cross"></div>
-                    </div>
+                    <div class="feedback-icon icon-error"><div class="cross"></div></div>
                 </div>
             </div>
             
@@ -206,7 +358,7 @@
             </div>
         </div>
 
-        <!-- Right Side: Move History -->
+        <!-- Move History -->
         <div class="lg:col-span-3">
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow h-full">
                 <h2 class="text-xl font-bold mb-4">Move History</h2>
@@ -237,6 +389,299 @@
     </div>
 
     <script>
+        // ============================================================
+        //  OPENINGS DATABASE
+        // ============================================================
+        const OPENINGS = {
+            white: [
+                {
+                    category: "1. e4 Openings",
+                    items: [
+                        {
+                            name: "Italian Game",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Bd2 Bxd2+ 8. Nbxd2 *",
+                                "1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bc5 5. O-O O-O 6. c3 d6 7. Bb3 a6 *",
+                                "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. O-O Nf6 5. d3 O-O 6. c3 d6 7. Re1 a6 *"
+                            ]
+                        },
+                        {
+                            name: "Ruy Lopez",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 *",
+                                "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Nxe4 6. d4 b5 7. Bb3 d5 8. dxe5 Be6 *",
+                                "1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Nd6 6. Bxc6 dxc6 7. dxe5 Nf5 8. Qxd8+ *"
+                            ]
+                        },
+                        {
+                            name: "King's Gambit",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 e5 2. f4 exf4 3. Nf3 d6 4. Bc4 h6 5. d4 g5 6. O-O Bg7 7. c3 *",
+                                "1. e4 e5 2. f4 exf4 3. Nf3 g5 4. Bc4 g4 5. O-O gxf3 6. Qxf3 Qf6 7. e5 Qxe5 *",
+                                "1. e4 e5 2. f4 d5 3. exd5 e4 4. d3 Nf6 5. dxe4 Nxe4 6. Nf3 Bc5 *"
+                            ]
+                        },
+                        {
+                            name: "Scotch Game",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Nf6 5. Nxc6 bxc6 6. e5 Qe7 7. Qe2 Nd5 8. c4 *",
+                                "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Bc5 5. Be3 Qf6 6. c3 Nge7 7. Bc4 *",
+                                "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 d6 5. Nc3 Nf6 6. g3 Be7 7. Bg2 O-O *"
+                            ]
+                        },
+                        {
+                            name: "Vienna Game",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 e5 2. Nc3 Nf6 3. f4 d5 4. fxe5 Nxe4 5. Nf3 Nc6 6. d4 *",
+                                "1. e4 e5 2. Nc3 Nc6 3. Bc4 Bc5 4. Qg4 Qf6 5. Nd5 Qxf2+ 6. Kd1 *",
+                                "1. e4 e5 2. Nc3 Nf6 3. g3 d5 4. exd5 Nxd5 5. Bg2 Nxc3 6. bxc3 Bd6 *"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    category: "1. d4 Openings",
+                    items: [
+                        {
+                            name: "London System",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 d5 2. Bf4 Nf6 3. e3 e6 4. Nf3 c5 5. c3 Nc6 6. Bd3 Bd6 7. Bxd6 Qxd6 8. Nbd2 *",
+                                "1. d4 Nf6 2. Bf4 d5 3. e3 e6 4. Nf3 Bd6 5. Bg3 O-O 6. Bd3 c5 7. c3 Nc6 *",
+                                "1. d4 d5 2. Bf4 c5 3. e3 Nc6 4. Nf3 Nf6 5. c3 e6 6. Bd3 Bd6 7. Bxd6 Qxd6 *",
+                                "1. d4 Nf6 2. Bf4 g6 3. e3 Bg7 4. Nf3 d6 5. h3 O-O 6. Be2 c5 7. c3 *"
+                            ]
+                        },
+                        {
+                            name: "Queen's Gambit",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 h6 7. Bh4 b6 *",
+                                "1. d4 d5 2. c4 dxc4 3. e4 e5 4. Nf3 exd4 5. Bxc4 Nc6 6. O-O Bc5 *",
+                                "1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. e3 a6 6. b3 Bb4 7. Bd2 *"
+                            ]
+                        },
+                        {
+                            name: "Catalan Opening",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 Nf6 2. c4 e6 3. g3 d5 4. Bg2 Be7 5. Nf3 O-O 6. O-O dxc4 7. Qc2 a6 8. Qxc4 *",
+                                "1. d4 Nf6 2. c4 e6 3. g3 d5 4. Nf3 Be7 5. Bg2 O-O 6. O-O c6 7. Qc2 Nbd7 *",
+                                "1. d4 d5 2. c4 e6 3. g3 Nf6 4. Bg2 dxc4 5. Nf3 Nc6 6. O-O Rb8 7. Qc2 *"
+                            ]
+                        },
+                        {
+                            name: "King's Indian Attack",
+                            tag: "other",
+                            lines: [
+                                "1. Nf3 d5 2. g3 Nf6 3. Bg2 e6 4. O-O Be7 5. d3 O-O 6. Nbd2 c5 7. e4 *",
+                                "1. e4 c5 2. Nf3 e6 3. d3 Nc6 4. g3 Nf6 5. Bg2 Be7 6. O-O O-O 7. Nbd2 *",
+                                "1. Nf3 Nf6 2. g3 g6 3. Bg2 Bg7 4. O-O O-O 5. d3 d6 6. Nbd2 Nbd7 7. e4 *"
+                            ]
+                        },
+                        {
+                            name: "Colle System",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 d5 2. Nf3 Nf6 3. e3 e6 4. Bd3 c5 5. c3 Nc6 6. Nbd2 Bd6 7. O-O O-O *",
+                                "1. d4 d5 2. Nf3 Nf6 3. e3 Bf5 4. Bd3 Bxd3 5. Qxd3 e6 6. O-O c5 7. c3 *",
+                                "1. d4 Nf6 2. Nf3 d5 3. e3 e6 4. Bd3 Be7 5. O-O O-O 6. b3 b6 7. Bb2 *"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            black: [
+                {
+                    category: "Responses to 1. e4",
+                    items: [
+                        {
+                            name: "Sicilian Defense",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be2 e5 7. Nb3 Be7 8. O-O O-O *",
+                                "1. e4 c5 2. Nf3 Nc6 3. d4 cxd4 4. Nxd4 g6 5. Nc3 Bg7 6. Be3 Nf6 7. Bc4 O-O *",
+                                "1. e4 c5 2. Nf3 e6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 d6 6. g4 h6 7. g5 hxg5 *",
+                                "1. e4 c5 2. c3 d5 3. exd5 Qxd5 4. d4 Nf6 5. Nf3 Bg4 6. dxc5 e6 7. Be2 *"
+                            ]
+                        },
+                        {
+                            name: "French Defense",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 cxd4 *",
+                                "1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. Bd3 c5 6. c3 Nc6 7. Ne2 cxd4 *",
+                                "1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Bd7 6. Be2 Nge7 7. Na3 *"
+                            ]
+                        },
+                        {
+                            name: "Caro-Kann Defense",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Bf5 5. Ng3 Bg6 6. h4 h6 7. Nf3 Nd7 *",
+                                "1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 e6 5. Be2 Ne7 6. O-O c5 7. c3 *",
+                                "1. e4 c6 2. c4 d5 3. exd5 cxd5 4. cxd5 Nf6 5. Nc3 g6 6. Nf3 Bg7 *"
+                            ]
+                        },
+                        {
+                            name: "Pirc Defense",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Nf3 Bg7 5. Bc4 O-O 6. O-O Bg4 7. h3 Bxf3 8. Qxf3 Nc6 *",
+                                "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Bc4 Bg7 5. Nf3 O-O 6. O-O Bg4 7. h3 Bxf3 8. Qxf3 Nc6 *",
+                                "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. f4 Bg7 5. Nf3 O-O 6. Bd3 Na6 7. O-O c5 *"
+                            ]
+                        },
+                        {
+                            name: "Scandinavian Defense",
+                            tag: "e4",
+                            lines: [
+                                "1. e4 d5 2. exd5 Qxd5 3. Nc3 Qa5 4. d4 Nf6 5. Nf3 Bf5 6. Bc4 e6 7. Bd2 Qb6 *",
+                                "1. e4 d5 2. exd5 Nf6 3. d4 Nxd5 4. c4 Nb6 5. Nf3 g6 6. Nc3 Bg7 7. Be2 O-O *",
+                                "1. e4 d5 2. exd5 Qxd5 3. Nc3 Qd8 4. d4 Nf6 5. Nf3 Bf5 6. Bc4 e6 *"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    category: "Responses to 1. d4",
+                    items: [
+                        {
+                            name: "King's Indian Defense",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 *",
+                                "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. f3 O-O 6. Be3 c5 7. dxc5 dxc5 *",
+                                "1. d4 Nf6 2. c4 g6 3. g3 Bg7 4. Bg2 d6 5. Nf3 O-O 6. Nc3 Nc6 7. O-O e5 *"
+                            ]
+                        },
+                        {
+                            name: "Nimzo-Indian Defense",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. Qc2 d5 5. cxd5 Qxd5 6. e3 O-O 7. a3 Bxc3+ *",
+                                "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 O-O 5. Bd3 d5 6. Nf3 c5 7. O-O Nc6 *",
+                                "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. a3 Bxc3+ 5. bxc3 d6 6. Nf3 Qd7 7. e4 *"
+                            ]
+                        },
+                        {
+                            name: "Grünfeld Defense",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. cxd5 Nxd5 5. e4 Nxc3 6. bxc3 Bg7 7. Nf3 c5 8. Be3 *",
+                                "1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. Bg5 Ne4 5. Bh4 Nxc3 6. bxc3 dxc4 7. e3 *",
+                                "1. d4 Nf6 2. c4 g6 3. g3 d5 4. Bg2 Bg7 5. Nf3 O-O 6. cxd5 Nxd5 7. O-O Nb6 *"
+                            ]
+                        },
+                        {
+                            name: "Dutch Defense",
+                            tag: "other",
+                            lines: [
+                                "1. d4 f5 2. g3 Nf6 3. Bg2 e6 4. Nf3 Be7 5. O-O O-O 6. c4 d6 7. Nc3 Ne4 *",
+                                "1. d4 f5 2. c4 Nf6 3. g3 e6 4. Bg2 Be7 5. Nf3 O-O 6. O-O d5 7. b3 c6 *",
+                                "1. d4 f5 2. Nf3 Nf6 3. g3 g6 4. Bg2 Bg7 5. O-O O-O 6. c4 d6 7. Nc3 *"
+                            ]
+                        },
+                        {
+                            name: "Queen's Indian Defense",
+                            tag: "d4",
+                            lines: [
+                                "1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. g3 Bb7 5. Bg2 Be7 6. O-O O-O 7. Nc3 Ne4 *",
+                                "1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. e3 Bb7 5. Bd3 d5 6. O-O Be7 7. b3 O-O *",
+                                "1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. a3 Bb7 5. Nc3 d5 6. cxd5 Nxd5 7. e3 *"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // ============================================================
+        //  MODAL STATE
+        // ============================================================
+        let currentTab = 'white';
+        let selectedOpening = null;
+
+        function openModal() {
+            document.getElementById('openingsModal').classList.add('open');
+            renderModal();
+        }
+
+        function closeModal() {
+            document.getElementById('openingsModal').classList.remove('open');
+            selectedOpening = null;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            selectedOpening = null;
+            document.getElementById('tabWhite').classList.toggle('active', tab === 'white');
+            document.getElementById('tabBlack').classList.toggle('active', tab === 'black');
+            renderModal();
+        }
+
+        function renderModal() {
+            const body = document.getElementById('modalBody');
+            body.innerHTML = '';
+            const data = OPENINGS[currentTab];
+
+            data.forEach(category => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'opening-category';
+                catDiv.innerHTML = `<h3>${category.category}</h3>`;
+
+                const grid = document.createElement('div');
+                grid.className = 'openings-grid';
+
+                category.items.forEach(opening => {
+                    const card = document.createElement('div');
+                    card.className = 'opening-card';
+                    if (selectedOpening && selectedOpening.name === opening.name) {
+                        card.classList.add('selected');
+                    }
+
+                    const tagClass = opening.tag === 'e4' ? 'tag-e4' : opening.tag === 'd4' ? 'tag-d4' : 'tag-other';
+                    card.innerHTML = `
+                        <div class="card-name">${opening.name}</div>
+                        <div class="card-lines">${opening.lines.length} line${opening.lines.length !== 1 ? 's' : ''}</div>
+                        <span class="card-tag ${tagClass}">${opening.tag}</span>
+                    `;
+                    card.onclick = () => {
+                        selectedOpening = opening;
+                        renderModal(); // re-render to update selection
+                    };
+                    grid.appendChild(card);
+                });
+
+                catDiv.appendChild(grid);
+                body.appendChild(catDiv);
+            });
+        }
+
+        function loadSelectedOpening() {
+            if (!selectedOpening) {
+                alert('Please select an opening first.');
+                return;
+            }
+            const pgn = selectedOpening.lines.join('\n');
+            document.getElementById('pgnInput').value = pgn;
+            closeModal();
+            loadLines();
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('openingsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ============================================================
+        //  CHESS BOARD ENGINE  (unchanged from original)
+        // ============================================================
         const PIECES = {
             'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
             'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
@@ -260,7 +705,7 @@
         let targetMoves = [];
         let currentMovePointer = 0;
         let isFlipped = false;
-        let userSide = 'w'; // 'w' or 'b'
+        let userSide = 'w';
         let isProcessing = false;
 
         function initBoard() {
@@ -270,11 +715,9 @@
                 const row = Math.floor(i / 8);
                 const col = i % 8;
                 const isLight = (row + col) % 2 === 0;
-                
                 square.classList.add('square', isLight ? 'light' : 'dark');
                 square.dataset.index = i;
                 square.dataset.coord = String.fromCharCode(97 + col) + (8 - row);
-                
                 square.addEventListener('click', handleSquareClick);
                 boardElement.appendChild(square);
             }
@@ -283,8 +726,6 @@
 
         function setUserSide(side) {
             userSide = side;
-            
-            // UI Toggle
             const wBtn = document.getElementById('sideWhite');
             const bBtn = document.getElementById('sideBlack');
             if (side === 'w') {
@@ -296,10 +737,7 @@
                 wBtn.className = "px-6 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white";
                 if (!isFlipped) toggleFlip();
             }
-
-            if (currentLineIndex !== -1) {
-                resetCurrentLine();
-            }
+            if (currentLineIndex !== -1) resetCurrentLine();
         }
 
         function toggleFlip() {
@@ -319,7 +757,7 @@
                 const col = i % 8;
                 const squareData = position[row][col];
                 const squareEl = squares[i];
-                
+
                 squareEl.innerHTML = '';
                 squareEl.classList.remove('selected', 'valid-target', 'last-move');
 
@@ -338,8 +776,6 @@
 
         function handleSquareClick(e) {
             if (currentLineIndex === -1 || isProcessing) return;
-            
-            // Only allow user to move their side's pieces
             if (game.turn() !== userSide) return;
 
             const square = e.currentTarget;
@@ -352,21 +788,9 @@
             }
 
             if (selectedSquare) {
-                const move = game.move({
-                    from: selectedSquare,
-                    to: coord,
-                    promotion: 'q'
-                });
-
-                if (move) {
-                    validateMove(move);
-                    selectedSquare = null;
-                    return;
-                } else {
-                    selectedSquare = null;
-                    updateBoardUI();
-                    return;
-                }
+                const move = game.move({ from: selectedSquare, to: coord, promotion: 'q' });
+                if (move) { validateMove(move); selectedSquare = null; return; }
+                else { selectedSquare = null; updateBoardUI(); return; }
             }
 
             const piece = game.get(coord);
@@ -374,7 +798,6 @@
                 selectedSquare = coord;
                 updateBoardUI();
                 square.classList.add('selected');
-                
                 const moves = game.moves({ square: coord, verbose: true });
                 moves.forEach(m => {
                     const target = Array.from(boardElement.children).find(s => s.dataset.coord === m.to);
@@ -385,15 +808,12 @@
 
         function validateMove(move) {
             const expectedMove = targetMoves[currentMovePointer];
-            
             if (expectedMove && move.san === expectedMove.san) {
                 showFeedback(true);
                 currentMovePointer++;
                 updateProgressUI();
                 updateBoardUI();
-                
                 if (currentMovePointer < targetMoves.length) {
-                    // It's computer's turn
                     isProcessing = true;
                     setTimeout(makeComputerMove, 600);
                 } else {
@@ -407,22 +827,14 @@
         }
 
         function makeComputerMove() {
-            if (currentMovePointer >= targetMoves.length) {
-                isProcessing = false;
-                return;
-            }
-
+            if (currentMovePointer >= targetMoves.length) { isProcessing = false; return; }
             const nextMove = targetMoves[currentMovePointer];
             game.move(nextMove.san);
             currentMovePointer++;
-            
             updateBoardUI();
             updateProgressUI();
             isProcessing = false;
-
-            if (currentMovePointer >= targetMoves.length) {
-                onLineComplete();
-            }
+            if (currentMovePointer >= targetMoves.length) onLineComplete();
         }
 
         function onLineComplete() {
@@ -433,32 +845,23 @@
         function showFeedback(correct) {
             const el = document.getElementById(correct ? 'feedbackSuccess' : 'feedbackError');
             el.style.opacity = '1';
-            
             const icon = el.querySelector('.feedback-icon');
             icon.style.animation = 'none';
-            icon.offsetHeight; 
+            icon.offsetHeight;
             icon.style.animation = null;
-
-            setTimeout(() => {
-                el.style.opacity = '0';
-            }, 600);
+            setTimeout(() => { el.style.opacity = '0'; }, 600);
         }
 
         function loadLines() {
             const input = document.getElementById('pgnInput').value;
             const lines = input.split('\n').filter(l => l.trim().length > 5);
-            
             repertoire = [];
-            lines.forEach((line) => {
+            lines.forEach(line => {
                 const tempGame = new Chess();
                 if (tempGame.load_pgn(line.trim())) {
-                    repertoire.push({
-                        pgn: line,
-                        moves: tempGame.history({ verbose: true })
-                    });
+                    repertoire.push({ pgn: line, moves: tempGame.history({ verbose: true }) });
                 }
             });
-
             if (repertoire.length > 0) {
                 renderLineList();
                 document.getElementById('lineListContainer').classList.remove('hidden');
@@ -473,7 +876,6 @@
                 const btn = document.createElement('button');
                 btn.className = "text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition-colors text-sm border-l-4 border-transparent";
                 if (i === currentLineIndex) btn.classList.add('border-blue-500', 'bg-slate-600');
-                
                 const preview = line.pgn.substring(0, 45).replace(/\s+/g, ' ') + "...";
                 btn.innerHTML = `<div class="font-bold">Line ${i+1}</div><div class="text-slate-400 truncate text-xs">${preview}</div>`;
                 btn.onclick = () => selectLine(i);
@@ -496,28 +898,20 @@
             updateBoardUI();
             document.getElementById('statusLabel').innerText = "Active Training";
             document.getElementById('statusLabel').classList.remove('text-green-400');
-
-            // If user is playing Black, computer makes the first move
-            if (userSide === 'b') {
-                isProcessing = true;
-                setTimeout(makeComputerMove, 600);
-            }
+            if (userSide === 'b') { isProcessing = true; setTimeout(makeComputerMove, 600); }
         }
 
         function updateProgressUI() {
             const historyContainer = document.getElementById('moveHistory');
             historyContainer.innerHTML = '';
-            
             targetMoves.forEach((m, i) => {
                 const span = document.createElement('span');
                 const moveNum = Math.floor(i / 2) + 1;
                 const isWhite = i % 2 === 0;
-                
                 span.className = `px-2 py-1 rounded text-xs transition-colors ${i < currentMovePointer ? 'bg-blue-900/50 text-blue-300 border border-blue-800' : 'bg-slate-700/50 text-slate-500 border border-slate-700'}`;
                 span.innerText = `${isWhite ? moveNum + '.' : ''} ${m.san}`;
                 historyContainer.appendChild(span);
             });
-
             document.getElementById('moveCounter').innerText = `${currentMovePointer} / ${targetMoves.length}`;
         }
 
