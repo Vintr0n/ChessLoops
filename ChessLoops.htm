@@ -854,12 +854,15 @@
 
         function loadLines() {
             const input = document.getElementById('pgnInput').value;
-            const lines = input.split('\n').filter(l => l.trim().length > 5);
+            const blocks = input.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 5);
             repertoire = [];
-            lines.forEach(line => {
+            blocks.forEach(block => {
                 const tempGame = new Chess();
-                if (tempGame.load_pgn(line.trim())) {
-                    repertoire.push({ pgn: line, moves: tempGame.history({ verbose: true }) });
+                if (tempGame.load_pgn(block)) {
+                    const nameMatch = block.match(/\[Event\s+"([^"]+)"\]/);
+                    const name = nameMatch ? nameMatch[1] : null;
+                    const moveLine = block.split('\n').find(l => /^\d+\./.test(l.trim())) || block;
+                    repertoire.push({ pgn: block, moves: tempGame.history({ verbose: true }), name, preview: moveLine.trim() });
                 }
             });
             if (repertoire.length > 0) {
@@ -876,8 +879,9 @@
                 const btn = document.createElement('button');
                 btn.className = "text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition-colors text-sm border-l-4 border-transparent";
                 if (i === currentLineIndex) btn.classList.add('border-blue-500', 'bg-slate-600');
-                const preview = line.pgn.substring(0, 45).replace(/\s+/g, ' ') + "...";
-                btn.innerHTML = `<div class="font-bold">Line ${i+1}</div><div class="text-slate-400 truncate text-xs">${preview}</div>`;
+                const label = line.name || `Line ${i+1}`;
+                const preview = line.preview.substring(0, 48).replace(/\s+/g, ' ') + "...";
+                btn.innerHTML = `<div class="font-bold">${label}</div><div class="text-slate-400 truncate text-xs">${preview}</div>`;
                 btn.onclick = () => selectLine(i);
                 list.appendChild(btn);
             });
@@ -918,7 +922,20 @@
         initBoard();
 
         window.onload = () => {
-            const defaultLines = "1. d4 d5 2. Bf4 e6 3. e3 Nf6 4. Nf3 Bd6 5. Bg3 O-O 6. c3 c5 7. Bd3 Be7 8. Nbd2 Nc6 9. Ne5 Nxe5 10. dxe5 Nd7 11. Qh5 *\n1. d4 d5 2. Bf4 e6 3. e3 Bd6 4. Bg3 Bxg3 5. hxg3 Nc6 6. Nf3 Nf6 7. c3 a6 8. Nbd2 O-O 9. Bd3 Qe7 10. Ne5 Nxe5 11. dxe5 Ne4 12. Qh5 *\n1. d4 d5 2. Bf4 Nf6 3. e3 Bf5 4. Bd3 Bxd3 5. Qxd3 Nc6 6. Nf3 e6 7. O-O Bd6 8. Bg3 O-O 9. c4 Ne7 10. Qb3 Bxg3 11. hxg3 Qb8 *\n1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Bb5 Bd7 6. Nf3 Nxe5 7. Bxd7+ Nxd7 *\n1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Bd7 6. Bd3 cxd4 7. cxd4 Qb6 8. O-O Nxd4 9. Nxd4 Qxd4 *";
+            const defaultLines = [
+                '[Event "London1"]\n\n1. d4 d5 2. Bf4 e6 3. e3 Nf6 4. Nf3 Bd6 5. Bg3 O-O 6. c3 c5 7. Bd3 Be7 8. Nbd2 Nc6 9. Ne5 Nxe5 10. dxe5 Nd7 11. Qh5 *',
+                '[Event "London2"]\n\n1. d4 d5 2. Bf4 e6 3. e3 Bd6 4. Bg3 Bxg3 5. hxg3 Nc6 6. Nf3 Nf6 7. c3 a6 8. Nbd2 O-O 9. Bd3 Qe7 10. Ne5 Nxe5 11. dxe5 Ne4 12. Qh5 *',
+                '[Event "London3"]\n\n1. d4 d5 2. Bf4 Nf6 3. e3 Bf5 4. Bd3 Bxd3 5. Qxd3 Nc6 6. Nf3 e6 7. O-O Bd6 8. Bg3 O-O 9. c4 Ne7 10. Qb3 Bxg3 11. hxg3 Qb8 *',
+                '[Event "London4"]\n\n1. d4 e6 2. Bf4 d5 3. e3 c5 4. c3 c4 5. b3 cxb3 6. axb3 Nc6 7. Bb5 Nf6 8. Nf3 Be7 9. h3 O-O 10. O-O *',
+                '[Event "London5"]\n\n1. d4 g6 2. Bf4 Bg7 3. e3 Nf6 4. Nf3 O-O 5. c3 e6 6. Bd3 Nc6 7. e4 d6 8. O-O h6 9. Bd2 *',
+                '[Event "French1"]\n\n1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Bb5 Bd7 6. Nf3 Nxe5 7. Bxd7+ Nxd7 *',
+                '[Event "French2"]\n\n1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Bd7 6. Bd3 cxd4 7. cxd4 Qb6 8. O-O Nxd4 9. Nxd4 Qxd4 *',
+                '[Event "French3"]\n\n1. e4 e6 2. Nc3 d5 3. Nf3 d4 4. Nb5 c5 5. a4 a6 6. Na3 Bd6 *',
+                '[Event "French4"]\n\n1. e4 e6 2. d4 d5 3. Nf3 dxe4 4. Ne5 *',
+                '[Event "French5"]\n\n1. e4 e6 2. c3 d5 3. d3 Nc6 4. Nf3 dxe4 5. dxe4 Qxd1+ 6. Kxd1 Nf6 *',
+                '[Event "French6"]\n\n1. e4 e6 2. Nf3 d5 3. exd5 exd5 4. Nc3 d4 5. Nb5 c5 6. Qe2+ Be6 7. Qe5 Nc6 8. Nc7+ Kd7 9. Nxe6 Nxe5 10. Nxd8 Nxf3+ 11. gxf3 Rxd8 *',
+                '[Event "French7"]\n\n1. g3 e6 2. Bg2 d5 3. d4 c5 4. e3 Nf6 5. Ne2 Be7 6. O-O O-O 7. dxc5 Qa5 8. c4 dxc4 9. Qd4 Nc6 10. Qxc4 e5 11. Bd2 Qxc5 12. Qxc5 Bxc5 *'
+            ].join('\n\n');
             document.getElementById('pgnInput').value = defaultLines;
             loadLines();
         };
