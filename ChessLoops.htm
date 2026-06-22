@@ -15,6 +15,36 @@
             color: #f8fafc;
         }
 
+        /* ---- Main tab bar ---- */
+        .main-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.6rem;
+            padding: 0.25rem;
+            width: fit-content;
+        }
+        .main-tab {
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.4rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+            color: #94a3b8;
+            background: transparent;
+        }
+        .main-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
         .chess-board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -256,6 +286,57 @@
             justify-content: flex-end;
             flex-shrink: 0;
         }
+
+        /* ---- Free Play styles ---- */
+        .fp-move-log {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            max-height: 320px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #1e293b;
+        }
+        .fp-move-row {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            align-items: baseline;
+            padding: 0.15rem 0;
+        }
+        .fp-move-num { color: #64748b; min-width: 30px; font-size: 0.72rem; }
+        .fp-move-w { color: #f1f5f9; font-weight: 600; min-width: 64px; }
+        .fp-move-b { color: #cbd5e1; min-width: 64px; }
+        .fp-pgn-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: #a5f3fc;
+            min-height: 72px;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+        .fp-status-badge {
+            font-size: 0.78rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 0.4rem;
+            font-weight: 600;
+        }
+        .fp-status-badge.normal   { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+        .fp-status-badge.check    { background: #7c2d12; color: #fca5a5; }
+        .fp-status-badge.checkmate{ background: #7f1d1d; color: #f87171; }
+        .fp-status-badge.stalemate{ background: #1e3a5f; color: #93c5fd; }
+        .copy-toast {
+            font-size: 0.75rem;
+            color: #34d399;
+            margin-left: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .copy-toast.show { opacity: 1; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
@@ -270,17 +351,13 @@
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
-
-            <!-- Tab bar inside modal body header -->
             <div class="px-6 pt-4 flex-shrink-0">
                 <div class="tab-bar">
                     <button class="tab-btn active" id="tabWhite" onclick="switchTab('white')">♔ As White</button>
                     <button class="tab-btn" id="tabBlack" onclick="switchTab('black')">♚ As Black</button>
                 </div>
             </div>
-
             <div class="modal-body" id="modalBody"></div>
-
             <div class="modal-footer">
                 <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors">Cancel</button>
                 <button onclick="loadSelectedOpening()" class="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors">Load Lines</button>
@@ -289,104 +366,198 @@
     </div>
 
     <!-- ========== MAIN APP ========== -->
-    <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <!-- Sidebar -->
-        <div class="lg:col-span-4 flex flex-col gap-6">
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow">
-                <h2 class="text-xl font-bold mb-4">Line Setup</h2>
-                <p class="text-sm text-slate-400 mb-4">Paste multiple PGN lines below.</p>
-                <textarea 
-                    id="pgnInput" 
-                    class="w-full h-48 bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none pgn-input"
-                    placeholder="Paste lines here..."
-                ></textarea>
-                <div class="flex gap-2 mt-4">
-                    <button 
-                        onclick="openModal()"
-                        class="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-semibold py-2 rounded-lg transition-all text-sm flex items-center justify-center gap-2"
-                    >
-                        <span>♟</span> Popular Openings
-                    </button>
-                    <button 
-                        onclick="loadLines()"
-                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition-all text-sm"
-                    >
-                        Load Repertoire
-                    </button>
-                </div>
-            </div>
+    <div class="max-w-6xl w-full">
 
-            <div id="lineListContainer" class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow hidden">
-                <h2 class="text-xl font-bold mb-4">Select Line</h2>
-                <div id="lineList" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-2"></div>
-            </div>
+        <!-- Main tab switcher -->
+        <div class="main-tabs">
+            <button class="main-tab active" id="mainTabTrainer" onclick="switchMainTab('trainer')">♟ Repertoire Trainer</button>
+            <button class="main-tab"         id="mainTabFreeplay" onclick="switchMainTab('freeplay')">⚡ Free Play</button>
         </div>
 
-        <!-- Board -->
-        <div class="lg:col-span-5 flex flex-col items-center">
-            <div class="mb-6 flex bg-slate-800 p-1 rounded-lg border border-slate-700">
-                <button 
-                    id="sideWhite" 
-                    onclick="setUserSide('w')"
-                    class="px-6 py-2 rounded-md text-sm font-semibold transition-all bg-blue-600 text-white"
-                >
-                    Play as White
-                </button>
-                <button 
-                    id="sideBlack" 
-                    onclick="setUserSide('b')"
-                    class="px-6 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white"
-                >
-                    Play as Black
-                </button>
-            </div>
+        <!-- ===== TRAINER PANEL ===== -->
+        <div id="panelTrainer" class="panel active">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            <div class="relative w-full max-w-[500px]">
-                <div id="board" class="chess-board rounded shadow-2xl overflow-hidden"></div>
-                <div id="feedbackSuccess" class="feedback-container">
-                    <div class="feedback-icon icon-success"><div class="checkmark"></div></div>
-                </div>
-                <div id="feedbackError" class="feedback-container">
-                    <div class="feedback-icon icon-error"><div class="cross"></div></div>
-                </div>
-            </div>
-            
-            <div class="mt-6 w-full max-w-[500px] flex justify-between items-center bg-slate-800 p-4 rounded-lg border border-slate-700">
-                <div id="statusLabel" class="text-lg font-medium text-slate-300">Awaiting Input</div>
-                <div id="moveCounter" class="text-blue-400 font-bold">0 / 0</div>
-            </div>
-        </div>
+                <!-- Sidebar -->
+                <div class="lg:col-span-4 flex flex-col gap-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow">
+                        <h2 class="text-xl font-bold mb-4">Line Setup</h2>
+                        <p class="text-sm text-slate-400 mb-4">Paste multiple PGN lines below.</p>
+                        <textarea 
+                            id="pgnInput" 
+                            class="w-full h-48 bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none pgn-input"
+                            placeholder="Paste lines here..."
+                        ></textarea>
+                        <div class="flex gap-2 mt-4">
+                            <button 
+                                onclick="openModal()"
+                                class="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-semibold py-2 rounded-lg transition-all text-sm flex items-center justify-center gap-2"
+                            >
+                                <span>♟</span> Popular Openings
+                            </button>
+                            <button 
+                                onclick="loadLines()"
+                                class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition-all text-sm"
+                            >
+                                Load Repertoire
+                            </button>
+                        </div>
+                    </div>
 
-        <!-- Move History -->
-        <div class="lg:col-span-3">
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow h-full">
-                <h2 class="text-xl font-bold mb-4">Move History</h2>
-                <div id="moveHistory" class="flex flex-wrap gap-2 text-sm">
-                    <span class="text-slate-500 italic">No line active</span>
+                    <div id="lineListContainer" class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow hidden">
+                        <h2 class="text-xl font-bold mb-4">Select Line</h2>
+                        <div id="lineList" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-2"></div>
+                    </div>
                 </div>
-                
-                <div class="mt-8 border-t border-slate-700 pt-6">
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Settings</h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm">Flip Board</span>
+
+                <!-- Board -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+                    <div class="mb-6 flex bg-slate-800 p-1 rounded-lg border border-slate-700">
                         <button 
-                            onclick="toggleFlip()" 
-                            class="bg-slate-700 px-4 py-1 rounded-md text-sm border border-slate-600 hover:bg-slate-600 transition-colors"
+                            id="sideWhite" 
+                            onclick="setUserSide('w')"
+                            class="px-6 py-2 rounded-md text-sm font-semibold transition-all bg-blue-600 text-white"
                         >
-                            Rotate
+                            Play as White
+                        </button>
+                        <button 
+                            id="sideBlack" 
+                            onclick="setUserSide('b')"
+                            class="px-6 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white"
+                        >
+                            Play as Black
                         </button>
                     </div>
-                    <button 
-                        onclick="resetCurrentLine()"
-                        class="mt-8 w-full border border-slate-600 hover:bg-slate-700 text-slate-300 py-2 rounded-lg text-sm transition-colors"
-                    >
-                        Reset Line
-                    </button>
+
+                    <div class="relative w-full max-w-[500px]">
+                        <div id="board" class="chess-board rounded shadow-2xl overflow-hidden"></div>
+                        <div id="feedbackSuccess" class="feedback-container">
+                            <div class="feedback-icon icon-success"><div class="checkmark"></div></div>
+                        </div>
+                        <div id="feedbackError" class="feedback-container">
+                            <div class="feedback-icon icon-error"><div class="cross"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 w-full max-w-[500px] flex justify-between items-center bg-slate-800 p-4 rounded-lg border border-slate-700">
+                        <div id="statusLabel" class="text-lg font-medium text-slate-300">Awaiting Input</div>
+                        <div id="moveCounter" class="text-blue-400 font-bold">0 / 0</div>
+                    </div>
+                </div>
+
+                <!-- Move History -->
+                <div class="lg:col-span-3">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow h-full">
+                        <h2 class="text-xl font-bold mb-4">Move History</h2>
+                        <div id="moveHistory" class="flex flex-wrap gap-2 text-sm">
+                            <span class="text-slate-500 italic">No line active</span>
+                        </div>
+                        
+                        <div class="mt-8 border-t border-slate-700 pt-6">
+                            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Settings</h3>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Flip Board</span>
+                                <button 
+                                    onclick="toggleFlip()" 
+                                    class="bg-slate-700 px-4 py-1 rounded-md text-sm border border-slate-600 hover:bg-slate-600 transition-colors"
+                                >
+                                    Rotate
+                                </button>
+                            </div>
+                            <button 
+                                onclick="resetCurrentLine()"
+                                class="mt-8 w-full border border-slate-600 hover:bg-slate-700 text-slate-300 py-2 rounded-lg text-sm transition-colors"
+                            >
+                                Reset Line
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- /panelTrainer -->
+
+        <!-- ===== FREE PLAY PANEL ===== -->
+        <div id="panelFreeplay" class="panel">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <!-- Board col -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+
+                    <!-- Orientation toggle -->
+                    <div class="mb-6 flex bg-slate-800 p-1 rounded-lg border border-slate-700">
+                        <button id="fpSideWhite" onclick="setFpOrientation('w')"
+                            class="px-6 py-2 rounded-md text-sm font-semibold transition-all bg-blue-600 text-white">
+                            White at Bottom
+                        </button>
+                        <button id="fpSideBlack" onclick="setFpOrientation('b')"
+                            class="px-6 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white">
+                            Black at Bottom
+                        </button>
+                    </div>
+
+                    <div class="relative w-full max-w-[500px]">
+                        <div id="fpBoard" class="chess-board rounded shadow-2xl overflow-hidden"></div>
+                    </div>
+
+                    <div class="mt-6 w-full max-w-[500px] flex justify-between items-center bg-slate-800 p-4 rounded-lg border border-slate-700">
+                        <div id="fpStatusLabel" class="text-lg font-medium text-slate-300">White to move</div>
+                        <div id="fpMoveNum" class="text-blue-400 font-bold">Move 1</div>
+                    </div>
+
+                    <div class="mt-3 w-full max-w-[500px] flex gap-3">
+                        <button onclick="fpUndo()"
+                            class="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-semibold py-2 rounded-lg transition-all text-sm">
+                            ↩ Undo Move
+                        </button>
+                        <button onclick="fpReset()"
+                            class="flex-1 border border-slate-600 hover:bg-slate-700 text-slate-300 py-2 rounded-lg text-sm transition-colors">
+                            Reset Board
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Console col -->
+                <div class="lg:col-span-7 flex flex-col gap-6">
+
+                    <!-- Move log -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold">Move Log</h2>
+                            <span id="fpStatusBadge" class="fp-status-badge normal">White to move</span>
+                        </div>
+                        <div class="fp-move-log" id="fpMoveLog">
+                            <span class="text-slate-500 italic text-sm">No moves yet</span>
+                        </div>
+                    </div>
+
+                    <!-- PGN output -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h2 class="text-xl font-bold">PGN Output</h2>
+                            <button onclick="fpCopyPgn()"
+                                class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-semibold px-3 py-1 rounded-lg transition-all text-xs">
+                                Copy
+                            </button>
+                            <span class="copy-toast" id="copyToast">✓ Copied!</span>
+                        </div>
+                        <div class="fp-pgn-box" id="fpPgnBox">—</div>
+                        <p class="text-xs text-slate-500 mt-3">
+                            Copy this PGN and paste it into the <strong class="text-slate-400">Repertoire Trainer</strong> to drill the line you just played.
+                        </p>
+                    </div>
+
+                    <!-- Help card -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 custom-shadow text-sm text-slate-400">
+                        <p class="font-bold text-slate-200 mb-2">How to use Free Play</p>
+                        <p>Click any piece to see its legal moves highlighted, then click a destination square. Only legal moves are accepted. Use <strong class="text-slate-300">Undo</strong> to step back or <strong class="text-slate-300">Reset</strong> to start over. When you're happy with your line, hit <strong class="text-slate-300">Copy</strong> and paste the PGN into the Trainer.</p>
+                    </div>
+
                 </div>
             </div>
-        </div>
-    </div>
+        </div><!-- /panelFreeplay -->
+
+    </div><!-- /max-w-6xl -->
 
     <script>
         // ============================================================
@@ -602,6 +773,16 @@
         };
 
         // ============================================================
+        //  MAIN TAB SWITCHING
+        // ============================================================
+        function switchMainTab(tab) {
+            document.getElementById('mainTabTrainer').classList.toggle('active', tab === 'trainer');
+            document.getElementById('mainTabFreeplay').classList.toggle('active', tab === 'freeplay');
+            document.getElementById('panelTrainer').classList.toggle('active', tab === 'trainer');
+            document.getElementById('panelFreeplay').classList.toggle('active', tab === 'freeplay');
+        }
+
+        // ============================================================
         //  MODAL STATE
         // ============================================================
         let currentTab = 'white';
@@ -653,7 +834,7 @@
                     `;
                     card.onclick = () => {
                         selectedOpening = opening;
-                        renderModal(); // re-render to update selection
+                        renderModal();
                     };
                     grid.appendChild(card);
                 });
@@ -674,13 +855,12 @@
             loadLines();
         }
 
-        // Close modal on backdrop click
         document.getElementById('openingsModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
 
         // ============================================================
-        //  CHESS BOARD ENGINE  (unchanged from original)
+        //  PIECE IMAGES
         // ============================================================
         const PIECES = {
             'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
@@ -697,6 +877,9 @@
             'K': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg'
         };
 
+        // ============================================================
+        //  TRAINER ENGINE
+        // ============================================================
         let game = new Chess();
         let boardElement = document.getElementById('board');
         let selectedSquare = null;
@@ -838,8 +1021,8 @@
         }
 
         function onLineComplete() {
-            document.getElementById('statusLabel').innerText = "Line Complete";
-            document.getElementById('statusLabel').classList.add('text-green-400');
+            document.getElementById('statusLabel').innerText = "Line Complete ✓";
+            document.getElementById('statusLabel').style.color = '#4ade80';
         }
 
         function showFeedback(correct) {
@@ -911,7 +1094,7 @@
             updateProgressUI();
             updateBoardUI();
             document.getElementById('statusLabel').innerText = "Active Training";
-            document.getElementById('statusLabel').classList.remove('text-green-400');
+            document.getElementById('statusLabel').style.color = '';
             if (userSide === 'b') { isProcessing = true; setTimeout(makeComputerMove, 600); }
         }
 
@@ -929,20 +1112,197 @@
             document.getElementById('moveCounter').innerText = `${currentMovePointer} / ${targetMoves.length}`;
         }
 
+        // ============================================================
+        //  FREE PLAY ENGINE
+        // ============================================================
+        let fpGame = new Chess();
+        let fpBoardElement = document.getElementById('fpBoard');
+        let fpSelectedSquare = null;
+        let fpIsFlipped = false;
+
+        function initFpBoard() {
+            fpBoardElement.innerHTML = '';
+            for (let i = 0; i < 64; i++) {
+                const square = document.createElement('div');
+                const row = Math.floor(i / 8);
+                const col = i % 8;
+                const isLight = (row + col) % 2 === 0;
+                square.classList.add('square', isLight ? 'light' : 'dark');
+                square.dataset.index = i;
+                square.dataset.coord = String.fromCharCode(97 + col) + (8 - row);
+                square.addEventListener('click', handleFpClick);
+                fpBoardElement.appendChild(square);
+            }
+            updateFpBoardUI();
+            updateFpConsole();
+        }
+
+        function setFpOrientation(side) {
+            fpIsFlipped = (side === 'b');
+            fpBoardElement.classList.toggle('flipped', fpIsFlipped);
+            document.getElementById('fpSideWhite').className = `px-6 py-2 rounded-md text-sm font-semibold transition-all ${side === 'w' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`;
+            document.getElementById('fpSideBlack').className = `px-6 py-2 rounded-md text-sm font-semibold transition-all ${side === 'b' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`;
+        }
+
+        function updateFpBoardUI() {
+            const position = fpGame.board();
+            const squares = fpBoardElement.children;
+            const history = fpGame.history({ verbose: true });
+            const lastMove = history.length > 0 ? history[history.length - 1] : null;
+
+            for (let i = 0; i < 64; i++) {
+                const row = Math.floor(i / 8);
+                const col = i % 8;
+                const squareData = position[row][col];
+                const squareEl = squares[i];
+
+                squareEl.innerHTML = '';
+                squareEl.classList.remove('selected', 'valid-target', 'last-move');
+
+                if (squareData) {
+                    const img = document.createElement('img');
+                    img.src = PIECES[squareData.color === 'w' ? squareData.type.toUpperCase() : squareData.type];
+                    img.classList.add('piece');
+                    squareEl.appendChild(img);
+                }
+
+                if (lastMove && (squareEl.dataset.coord === lastMove.from || squareEl.dataset.coord === lastMove.to)) {
+                    squareEl.classList.add('last-move');
+                }
+            }
+        }
+
+        function handleFpClick(e) {
+            const square = e.currentTarget;
+            const coord = square.dataset.coord;
+
+            if (fpSelectedSquare === coord) {
+                fpSelectedSquare = null;
+                updateFpBoardUI();
+                return;
+            }
+
+            if (fpSelectedSquare) {
+                const move = fpGame.move({ from: fpSelectedSquare, to: coord, promotion: 'q' });
+                if (move) {
+                    fpSelectedSquare = null;
+                    updateFpBoardUI();
+                    updateFpConsole();
+                    return;
+                } else {
+                    fpSelectedSquare = null;
+                    updateFpBoardUI();
+                    // fall through to try selecting new piece
+                }
+            }
+
+            const piece = fpGame.get(coord);
+            if (piece && piece.color === fpGame.turn()) {
+                fpSelectedSquare = coord;
+                updateFpBoardUI();
+                square.classList.add('selected');
+                const moves = fpGame.moves({ square: coord, verbose: true });
+                moves.forEach(m => {
+                    const target = Array.from(fpBoardElement.children).find(s => s.dataset.coord === m.to);
+                    if (target) target.classList.add('valid-target');
+                });
+            }
+        }
+
+        function fpUndo() {
+            fpGame.undo();
+            fpSelectedSquare = null;
+            updateFpBoardUI();
+            updateFpConsole();
+        }
+
+        function fpReset() {
+            fpGame.reset();
+            fpSelectedSquare = null;
+            updateFpBoardUI();
+            updateFpConsole();
+        }
+
+        function updateFpConsole() {
+            const hist = fpGame.history();
+            const turn = fpGame.turn() === 'w' ? 'White' : 'Black';
+            const inCheckmate = fpGame.in_checkmate();
+            const inStalemate = fpGame.in_stalemate();
+            const inDraw = fpGame.in_draw();
+            const inCheck = fpGame.in_check();
+
+            // Status
+            let statusText = '', badgeClass = 'normal';
+            if (inCheckmate) {
+                statusText = (turn === 'White' ? 'Black' : 'White') + ' wins by checkmate';
+                badgeClass = 'checkmate';
+            } else if (inStalemate || inDraw) {
+                statusText = 'Draw';
+                badgeClass = 'stalemate';
+            } else if (inCheck) {
+                statusText = turn + ' is in check!';
+                badgeClass = 'check';
+            } else {
+                statusText = turn + ' to move';
+                badgeClass = 'normal';
+            }
+
+            document.getElementById('fpStatusLabel').innerText = statusText;
+            document.getElementById('fpMoveNum').innerText = `Move ${Math.floor(hist.length / 2) + 1}`;
+            const badge = document.getElementById('fpStatusBadge');
+            badge.textContent = statusText;
+            badge.className = `fp-status-badge ${badgeClass}`;
+
+            // Move log — paired rows
+            const log = document.getElementById('fpMoveLog');
+            if (hist.length === 0) {
+                log.innerHTML = '<span class="text-slate-500 italic text-sm">No moves yet</span>';
+            } else {
+                log.innerHTML = '';
+                for (let i = 0; i < hist.length; i += 2) {
+                    const row = document.createElement('div');
+                    row.className = 'fp-move-row';
+                    row.innerHTML = `
+                        <span class="fp-move-num">${Math.floor(i / 2) + 1}.</span>
+                        <span class="fp-move-w">${hist[i]}</span>
+                        <span class="fp-move-b">${hist[i + 1] || ''}</span>
+                    `;
+                    log.appendChild(row);
+                }
+                log.scrollTop = log.scrollHeight;
+            }
+
+            // PGN
+            const pgn = fpGame.pgn();
+            document.getElementById('fpPgnBox').textContent = pgn || '—';
+        }
+
+        function fpCopyPgn() {
+            const pgn = fpGame.pgn();
+            if (!pgn) return;
+            navigator.clipboard.writeText(pgn).then(() => {
+                const toast = document.getElementById('copyToast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
         initBoard();
+        initFpBoard();
 
         window.onload = () => {
             const lines = [
-				'[Event "Job-i-Q-trap1"]\n1. d4 Nf6 2. Nc3 d5 3. Bf4 c6 4. e3 Qb6 5. a3 Qxb2 6. Na4 *',
-				'[Event "Job-i-Q-trap2"]\n1. d4 d5 2. Nc3 Nf6 3. Bf4 Bf5 4. e3 e6 5. Nf3 c6 6. Ne5 Nd7 7. g4 Bg6 8. h4 h6 9. Nxg6 fxg6 10. Bd3 Kf7 11. Qf3 Qb6 12. O-O-O c5 13. g5 Ne8 14. Bc7+ *',
-				'[Event "Job-i-R-grab"]\n1.  d4 Nf6 2. Nc3 d5 3. Bf4 Nc6 4. Nb5 a6 5. Nxc7+ *',
-				'[Event "Job-i-Pirc-checkmate"]\n1. d4 Nf6 2. Nc3 g6 3. Bf4 Bg7 4. e4 d6 5. e5 dxe5 6. dxe5 Qxd1+ 7. Rxd1 Ng4 8. Nd5 Na6 9. Bxa6 bxa6 10. Nxc7+ Kf8 11. Rd8# *'
+                '[Event "Job-i-Q-trap1"]\n1. d4 Nf6 2. Nc3 d5 3. Bf4 c6 4. e3 Qb6 5. a3 Qxb2 6. Na4 *',
+                '[Event "Job-i-R-grab"]\n1.  d4 Nf6 2. Nc3 d5 3. Bf4 Nc6 4. Nb5 a6 5. Nxc7+ *',
+                '[Event "Job-i-Pirc-checkmate"]\n1. d4 Nf6 2. Nc3 g6 3. Bf4 Bg7 4. e4 d6 5. e5 dxe5 6. dxe5 Qxd1+ 7. Rxd1 Ng4 8. Nd5 Na6 9. Bxa6 bxa6 10. Nxc7+ Kf8 11. Rd8# *',
+				'[Event "Job-i-Poison-Pawn"]\1. d4 Nf6 2. Nc3 d5 3. Bf4 c6 4. e3 Nbd7 5. Bd3 h6 6. Qe2 g5 7. Be5 Nxe5 8. dxe5 Nd7 9. e6 fxe6 10. Bg6#'
             ];
             document.getElementById('pgnInput').value = lines.join('\n');
             loadLines();
         };
-
-	
     </script>
 </body>
 </html>
